@@ -25,3 +25,5 @@ async function verifyAuth(req: Request, res: Response, next: NextFunction) {
 		next(err);
 	}
 }
+
+export default verifyAuth;
