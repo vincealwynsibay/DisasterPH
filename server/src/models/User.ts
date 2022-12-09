@@ -41,7 +41,7 @@ const userSchema = new Schema<IUser>({
 	},
 	createdAt: {
 		type: String,
-		default: Date(),
+		default: new Date().toISOString(),
 	},
 });
 

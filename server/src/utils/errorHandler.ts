@@ -2,9 +2,9 @@ import { Request, Response, NextFunction } from "express";
 
 function errorHandler(
 	err: any,
-	req: Request,
+	_req: Request,
 	res: Response,
-	next: NextFunction
+	_next: NextFunction
 ) {
 	const { statusCode = 500 } = err;
 
@@ -14,3 +14,5 @@ function errorHandler(
 
 	return res.status(statusCode).json({ message: err.message });
 }
+
+export default errorHandler;

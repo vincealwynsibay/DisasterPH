@@ -54,7 +54,7 @@ const userSchema = new mongoose_1.Schema({
     },
     createdAt: {
         type: String,
-        default: Date(),
+        default: new Date().toISOString(),
     },
 });
 userSchema.virtual("fullName").get(function () {

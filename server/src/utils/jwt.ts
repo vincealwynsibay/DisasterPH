@@ -3,7 +3,7 @@ import ExpressError from "./ExpressError";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 
-async function verifyAuth(req: Request, res: Response, next: NextFunction) {
+async function verifyAuth(req: Request, _res: Response, next: NextFunction) {
 	try {
 		let token = req.headers.authorization;
 
@@ -19,7 +19,13 @@ async function verifyAuth(req: Request, res: Response, next: NextFunction) {
 			throw new ExpressError("Invalid Token", 401);
 		}
 
-		(req as any).user = await User.findById(decoded.sub);
+		const user = await User.findById(decoded.sub);
+
+		if (!user) {
+			throw new ExpressError("User not found", 401);
+		}
+		(req as any).user = user;
+
 		next();
 	} catch (err) {
 		next(err);

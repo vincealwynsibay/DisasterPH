@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import ExpressError from "../utils/ExpressError";
 import User from "../models/User";
 import bcrypt from "bcryptjs";
@@ -7,9 +7,11 @@ import jwt from "jsonwebtoken";
 import { uploadImage } from "../utils/cloudinary";
 import { IGetUserAuthRequest } from "../types";
 
-const register = async (req: Request, res: Response, next: NextFunction) => {
+const register = async (req: Request, res: Response) => {
 	const { email, password, username, firstName, lastName, middleInitial } =
 		req.body;
+
+	console.log("req.body ", req.body);
 
 	const user = await User.findOne({ email });
 
@@ -17,9 +19,10 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 		throw new ExpressError("Email already taken", 400);
 	}
 
-	const passwordHash = bcrypt.hash(password, 10);
+	const passwordHash = await bcrypt.hash(password, 10);
 	const avatar = gravatar.url(email, { s: "100", r: "x", d: "retro" }, true);
 
+	console.log(passwordHash, avatar);
 	const newUser = new User({
 		firstName,
 		middleInitial,
@@ -28,17 +31,15 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 		email,
 		password: passwordHash,
 		avatar,
+		createdAt: Date(),
 	});
 
+	console.log("newUser", newUser);
 	await newUser.save();
 	return res.json({ ok: true });
 };
 
-const authenticate = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+const authenticate = async (req: Request, res: Response) => {
 	const { email, password } = req.body;
 
 	const user = await User.findOne({ email });
@@ -60,39 +61,31 @@ const authenticate = async (
 	return res.json({ user, token });
 };
 
-const getCurrent = async (
-	req: IGetUserAuthRequest,
-	res: Response,
-	next: NextFunction
-) => {
+const getCurrent = async (req: IGetUserAuthRequest, res: Response) => {
 	return res.json(req.user);
 };
 
 // get all users
-const getAll = async (req: Request, res: Response, next: NextFunction) => {
+const getAll = async (_req: Request, res: Response) => {
 	const users = await User.find({});
 	return res.json(users);
 };
 
 // get user by id
-const getById = async (req: Request, res: Response, next: NextFunction) => {
+const getById = async (req: Request, res: Response) => {
 	const user = await User.findById(req.params.id);
 	return res.json(user);
 };
 
 // delete user by id
-const _delete = async (req: Request, res: Response, next: NextFunction) => {
+const _delete = async (req: Request, res: Response) => {
 	const user = await User.findByIdAndDelete(req.params.id);
 	return res.json(user);
 };
 
 // find user by id and update user
-const update = async (
-	req: IGetUserAuthRequest,
-	res: Response,
-	next: NextFunction
-) => {
-	const { firstName, middleInitial, lastName, username, email } = req.body;
+const update = async (req: IGetUserAuthRequest, res: Response) => {
+	const { username } = req.body;
 	const user = await User.findById(req.params.id);
 
 	// if user not found
@@ -120,11 +113,7 @@ const update = async (
 	return res.json(user);
 };
 
-const updateAvatar = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+const updateAvatar = async (req: Request, res: Response) => {
 	const user = await User.findById(req.params.id);
 
 	// if user not found

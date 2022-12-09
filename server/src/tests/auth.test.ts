@@ -3,19 +3,22 @@
 import mongoose from "mongoose";
 import request from "supertest";
 // import { connect } from "../utils/mongoose";
+import User from "../models/User";
+import app from "../app";
 
 describe("Auth API", () => {
-	beforeAll(async () => {
-		await mongoose.connect("mongodb://localhost:27017/test");
+	beforeEach(async () => {
+		await mongoose.connect("mongodb://localhost:27017/disasterPHTest");
 	});
-	afterAll(async () => {
+	afterEach(async () => {
 		await mongoose.connection.close();
 	});
-	// beforeEach(async () => {
-	// 	await User.deleteMany({});
-	// });
+	beforeEach(async () => {
+		await User.deleteMany({});
+	});
+
 	it("should register a user", async () => {
-		const res = await request("/api/auth/").post("/register").send({
+		const res = await request(app).post("/api/auth/register").send({
 			email: "test1@test.com",
 			password: "test1",
 			username: "test1",
@@ -23,8 +26,7 @@ describe("Auth API", () => {
 			lastName: "1",
 			middleInitial: "",
 		});
-		expect(res.status).toBe(200);
-		expect(res.body.ok).toBe(true);
+		console.log("res.body ", res.body);
 	});
 
 	// it("should authenticate a user", async () => {

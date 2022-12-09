@@ -9,14 +9,16 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const gravatar_1 = __importDefault(require("gravatar"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const cloudinary_1 = require("../utils/cloudinary");
-const register = async (req, res, next) => {
+const register = async (req, res) => {
     const { email, password, username, firstName, lastName, middleInitial } = req.body;
+    console.log("req.body ", req.body);
     const user = await User_1.default.findOne({ email });
     if (user) {
         throw new ExpressError_1.default("Email already taken", 400);
     }
-    const passwordHash = bcryptjs_1.default.hash(password, 10);
+    const passwordHash = await bcryptjs_1.default.hash(password, 10);
     const avatar = gravatar_1.default.url(email, { s: "100", r: "x", d: "retro" }, true);
+    console.log(passwordHash, avatar);
     const newUser = new User_1.default({
         firstName,
         middleInitial,
@@ -25,11 +27,13 @@ const register = async (req, res, next) => {
         email,
         password: passwordHash,
         avatar,
+        createdAt: Date(),
     });
+    console.log("newUser", newUser);
     await newUser.save();
     return res.json({ ok: true });
 };
-const authenticate = async (req, res, next) => {
+const authenticate = async (req, res) => {
     const { email, password } = req.body;
     const user = await User_1.default.findOne({ email });
     if (!user) {
@@ -44,23 +48,23 @@ const authenticate = async (req, res, next) => {
     });
     return res.json({ user, token });
 };
-const getCurrent = async (req, res, next) => {
+const getCurrent = async (req, res) => {
     return res.json(req.user);
 };
-const getAll = async (req, res, next) => {
+const getAll = async (_req, res) => {
     const users = await User_1.default.find({});
     return res.json(users);
 };
-const getById = async (req, res, next) => {
+const getById = async (req, res) => {
     const user = await User_1.default.findById(req.params.id);
     return res.json(user);
 };
-const _delete = async (req, res, next) => {
+const _delete = async (req, res) => {
     const user = await User_1.default.findByIdAndDelete(req.params.id);
     return res.json(user);
 };
-const update = async (req, res, next) => {
-    const { firstName, middleInitial, lastName, username, email } = req.body;
+const update = async (req, res) => {
+    const { username } = req.body;
     const user = await User_1.default.findById(req.params.id);
     if (!user) {
         throw new ExpressError_1.default(`User not found`, 400);
@@ -76,7 +80,7 @@ const update = async (req, res, next) => {
     await user.save();
     return res.json(user);
 };
-const updateAvatar = async (req, res, next) => {
+const updateAvatar = async (req, res) => {
     var _a;
     const user = await User_1.default.findById(req.params.id);
     if (!user) {

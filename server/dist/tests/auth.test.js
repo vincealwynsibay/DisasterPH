@@ -3,21 +3,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const mongoose_1 = __importDefault(require("mongoose"));
 const supertest_1 = __importDefault(require("supertest"));
-const user_1 = __importDefault(require("../models/user"));
-const mongoose_1 = require("../utils/mongoose");
+const User_1 = __importDefault(require("../models/User"));
+const app_1 = __importDefault(require("../app"));
 describe("Auth API", () => {
-    beforeAll(async () => {
-        await (0, mongoose_1.connect)();
+    beforeEach(async () => {
+        await mongoose_1.default.connect("mongodb://localhost:27017/disasterPHTest");
     });
-    afterAll(async () => {
-        await (0, mongoose_1.disconnect)();
+    afterEach(async () => {
+        await mongoose_1.default.connection.close();
     });
     beforeEach(async () => {
-        await user_1.default.deleteMany({});
+        await User_1.default.deleteMany({});
     });
     it("should register a user", async () => {
-        const res = await (0, supertest_1.default)("/api/auth").post("/register").send({
+        const res = await (0, supertest_1.default)(app_1.default).post("/api/auth/register").send({
             email: "test1@test.com",
             password: "test1",
             username: "test1",
@@ -25,17 +26,7 @@ describe("Auth API", () => {
             lastName: "1",
             middleInitial: "",
         });
-        expect(res.status).toBe(200);
-        expect(res.body.ok).toBe(true);
-    });
-    it("should authenticate a user", async () => {
-        const res = await (0, supertest_1.default)("/api/auth").post("/authenticate").send({
-            email: "test1@test.com",
-            password: "test1",
-        });
-        expect(res.status).toBe(200);
-        expect(res.body.user).toBeDefined();
-        expect(res.body.token).toBeDefined();
+        console.log("res.body ", res.body);
     });
 });
 //# sourceMappingURL=auth.test.js.map

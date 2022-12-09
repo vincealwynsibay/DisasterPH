@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ExpressError_1 = __importDefault(require("./ExpressError"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
-async function verifyAuth(req, res, next) {
+async function verifyAuth(req, _res, next) {
     try {
         let token = req.headers.authorization;
         if (!token) {
@@ -17,7 +17,11 @@ async function verifyAuth(req, res, next) {
         if (!decoded) {
             throw new ExpressError_1.default("Invalid Token", 401);
         }
-        req.user = await User_1.default.findById(decoded.sub);
+        const user = await User_1.default.findById(decoded.sub);
+        if (!user) {
+            throw new ExpressError_1.default("User not found", 401);
+        }
+        req.user = user;
         next();
     }
     catch (err) {

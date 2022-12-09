@@ -8,13 +8,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 require("dotenv/config");
 const connect = () => {
     mongoose_1.default
-        .connect(process.env.MONGODB_URI, {})
-        .then(() => {
-        console.log("[server] Database connection established");
-    })
-        .catch(() => {
-        console.log("[server] Database connection error");
-    });
+        .connect("mongodb://localhost:27017/disasterphTest");
 };
 exports.connect = connect;
 const disconnect = () => {
